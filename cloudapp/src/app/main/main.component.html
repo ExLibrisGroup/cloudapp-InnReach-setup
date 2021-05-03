@@ -1,0 +1,29 @@
+<section>
+  <h1>
+    Welcome!
+  </h1>
+  <p>Click Run to upload your location to InnReach D2IR</p>
+  <!--
+  <ul>
+    <li>...</li>
+  </ul>
+  <p>...</p>-->
+</section>
+
+<section>
+  <mat-card class="example-card">
+    <mat-card-actions>
+      <button mat-raised-button color="primary" (click)="callInnreach()"
+        [disabled]="running">Run</button>
+    </mat-card-actions>
+    <mat-card-header>
+      <mat-card-title>Log:</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <textarea #logResultArea [value]="logString"></textarea>
+    </mat-card-content>
+  </mat-card>
+</section>
+<div class="loading-shade" *ngIf="loading">
+  <mat-spinner diameter="50"></mat-spinner>
+</div>

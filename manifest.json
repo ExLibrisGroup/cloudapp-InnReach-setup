@@ -1,0 +1,24 @@
+{
+   "id": "exlibrisgroup/inn-reach-locations-setup",
+   "title": "InnReach Locations Setup",
+   "description": "Helps with initial setup of libraries locations in InnReach",
+   "subtitle": "Automatically get the info from Alma and update InnReach using an API call",
+   "author": "Ori Miller",
+   "icon": {
+      "type": "url",
+      "value": "/assets/InnReach-locations-setup-logo.png"
+   },
+   "contentSecurity": {
+      "sandbox": {
+         "modals": true
+      },
+      "connectSrc": [
+         "http://*.corp.exlibrisgroup.com:1801",
+         "https://*.alma.exlibrisgroup.com"
+      ]
+   },
+   "fullscreen": {
+      "allow": true,
+      "open": true
+   }
+}
