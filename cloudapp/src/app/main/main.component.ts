@@ -11,7 +11,7 @@ import {
 })
 export class MainComponent implements OnInit {
 
-  private logString: string = "";
+  logString: string = "";
 
   private integrationProfileId: string;
 
