@@ -33,8 +33,9 @@ export class MainComponent implements OnInit {
   loadLocationCodes() {
     this.restService.call('/conf/libraries').subscribe(result => {
       //console.log(result);
-      if (result.library.length < 1) {
+      if (!result.library) {
         this.logString += "Error: No libraries detected!\n";
+        return;
       }
       result.library.forEach((elementLib, index) => {
         var libCode = elementLib.code;
@@ -46,7 +47,7 @@ export class MainComponent implements OnInit {
                 var locCode = elementHol.code; var holname = elementHol.name;
                 //console.log(libCode +" > " + holCode);
                 if (this.allLocationCodes.includes(locCode)) {
-                  this.logString += "Warning: Duplicate location code: " + locCode + " skipping code in library: " + libCode + "\n";
+                  this.logString += "Warning: Duplicate location code: " + locCode + ". Skipping the one in library: " + libCode + "\n";
                 } else {
                   this.allLocationCodes.push(locCode);
                   this.locationsJsonArr.push( {"locationKey":locCode, "description":holname } );
@@ -62,10 +63,11 @@ export class MainComponent implements OnInit {
 
   loadIntegrationProfileId() {
     this.restService.call('/conf/integration-profiles?q=name~innreach&ILL_INTEGRATION=ILL_INTEGRATION').subscribe(result => 
-      {
-        //console.log(result);
-        if (result.integration_profile.length < 1) {
+      { 
+        console.log("loadIntegrationProfileId(): ", result);
+        if (!result.integration_profile) {
           this.logString += "Error: No ILL_INTEGRATION integration profile with innreach in its name detected!\n";
+          return;
         }
         if (result.integration_profile.length > 1) {
           this.logString += "Warning: More than one ILL_INTEGRATION integration profile detected - using the first one, which has code: " +
@@ -80,7 +82,7 @@ export class MainComponent implements OnInit {
 
   
   callInnreach() {
-    this.logString += "Unique locations codes: " + this.allLocationCodes + "\n";
+    this.logString += "Unique location codes: " + this.allLocationCodes + "\n";
 
     let locationsJson = { "locationList": this.locationsJsonArr };
     // QA: let locationsJson={"locationList":[{"locationKey":"amlc1", "description":"Alma North Branch"},{"locationKey":"amlc2", "description":"Alma South Branch"}]}
@@ -88,7 +90,7 @@ export class MainComponent implements OnInit {
     this.eventsService.getInitData().subscribe(
       data => {
         let url = data.urls['alma'] + "/view/innreachCloudApp";
-        console.log("getInitData (to get Alma's URL)...", url);
+        console.log("getInitData (to get Alma's URL): ", url);
 
         this.logString += "User: " + data.user.primaryId + "\n";
         //console.log("App loading Alma's JWT...");
@@ -96,6 +98,7 @@ export class MainComponent implements OnInit {
           async jwt => {
             this.logString += "Fetched token from Alma\nCalling https://rssandbox-api.iii.com/innreach/v2/contribution/locations ...\n";
             let authHeader = "Bearer "+ jwt;
+            console.log ("authHeader:",authHeader);
             const headers = new HttpHeaders({'Authorization': authHeader, 'X-integrationProfileId': this.integrationProfileId});
 
             await this.http.post<any>(url, locationsJson, { headers }) //.pipe(timeout(60*1000))
