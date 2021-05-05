@@ -62,7 +62,7 @@ export class MainComponent implements OnInit {
   }
 
   loadIntegrationProfileId() {
-    this.restService.call('/conf/integration-profiles?q=name~innreach&ILL_INTEGRATION=ILL_INTEGRATION').subscribe(result => 
+    this.restService.call('/conf/integration-profiles?q=name~innreach&type=ILL_INTEGRATION').subscribe(result => 
       { 
         console.log("loadIntegrationProfileId(): ", result);
         if (!result.integration_profile) {
@@ -85,7 +85,9 @@ export class MainComponent implements OnInit {
     this.logString += "Unique location codes: " + this.allLocationCodes + "\n";
 
     let locationsJson = { "locationList": this.locationsJsonArr };
-    // QA: let locationsJson={"locationList":[{"locationKey":"amlc1", "description":"Alma North Branch"},{"locationKey":"amlc2", "description":"Alma South Branch"}]}
+    // tests: 
+    // let locationsJson={"locationList":[{"locationKey":"amlc1", "description":"Alma North Branch"},{"locationKey":"amlc2", "description":"Alma South Branch"}]}
+    // let locationsJson={"locationList":[{"locationKey":"amlc11","description":"Music Theses Suppressed"}]};
 
     this.eventsService.getInitData().subscribe(
       data => {
@@ -97,6 +99,7 @@ export class MainComponent implements OnInit {
         this.eventsService.getAuthToken().subscribe(
           async jwt => {
             this.logString += "Fetched token from Alma\nCalling https://rssandbox-api.iii.com/innreach/v2/contribution/locations ...\n";
+            this.logString += "Body:\n"+JSON.stringify(locationsJson)+"\n";
             let authHeader = "Bearer "+ jwt;
             console.log ("authHeader:",authHeader);
             const headers = new HttpHeaders({'Authorization': authHeader, 'X-integrationProfileId': this.integrationProfileId});
