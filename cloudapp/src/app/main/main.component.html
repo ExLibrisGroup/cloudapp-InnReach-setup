@@ -4,18 +4,25 @@
   </h1>
   <p>Click Run to upload your locations to InnReach D2IR</p>
   <p>Note: The integration profile must have "InnReach" in its name.</p>
+  <mat-slide-toggle #logToggle style="padding-left: 16px;">Show Log</mat-slide-toggle>
+
 </section>
 
 <section>
   <mat-card class="example-card">
     <mat-card-actions>
-      <button mat-raised-button color="primary" (click)="callInnreach()">Run</button>
+      <button mat-raised-button color="primary" [disabled]="!allowRun" (click)="callInnreach(logToggle)">Run</button>
     </mat-card-actions>
-    <mat-card-header>
-      <mat-card-title>Log:</mat-card-title>
-    </mat-card-header>
-    <mat-card-content>
-      <textarea #logResultArea [value]="logString"></textarea>
-    </mat-card-content>
+    <div class="loading-shade" *ngIf="isLoading">
+      <mat-spinner diameter="50"></mat-spinner>
+    </div>
+    <div *ngIf="logToggle.checked">
+      <mat-card-header>
+        <mat-card-title>Log:</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <textarea #logResultArea [value]="logString"></textarea>
+      </mat-card-content>
+    </div>
   </mat-card>
 </section>
