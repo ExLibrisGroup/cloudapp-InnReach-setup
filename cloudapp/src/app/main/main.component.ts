@@ -51,7 +51,9 @@ export class MainComponent implements OnInit {
             result.location.forEach((elementHol, index) => {
               var locCode = elementHol.code; var holname = elementHol.name;
               //console.log(libCode +" > " + holCode);
-              if (this.allLocationCodes.includes(locCode)) {
+              if (locCode.length > 5) {
+                this.logString += "Warning: location code longer than 5 characters: " + locCode + " in library: " + libCode + "\n";
+              } else if (this.allLocationCodes.includes(locCode)) {
                 this.logString += "Warning: Duplicate location code: " + locCode + ". Skipping the one in library: " + libCode + "\n";
               } else {
                 this.allLocationCodes.push(locCode);
