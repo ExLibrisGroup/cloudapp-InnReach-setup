@@ -17,8 +17,8 @@ export class MainComponent implements OnInit {
   isLoading: boolean = false;
   allowRun: boolean = false;
 
-
   private integrationProfileId: string;
+  private customerParamHashLocations: string; // hash_innreach_locations_on_publishing
 
   private allLocationCodes: string[] = [];
   private locationsJsonArr = [];
@@ -29,13 +29,37 @@ export class MainComponent implements OnInit {
     private alert: AlertService) { }
 
   ngOnInit() {
-    this.loadLocationCodes();
+    this.getCustomerParam();
     this.loadIntegrationProfileId();
-
     //"icon": {      "type": "font",      "value": "fa fa-paper-plane"   },
   }
 
+  getCustomerParam() {
+    forkJoin({ initData: this.eventsService.getInitData(), authToken: this.eventsService.getAuthToken() }).pipe(concatMap((data) => {
+      let url = data.initData.urls['alma'] + "view/innreachCloudApp?op=getCP";
+      let authHeader = "Bearer " + data.authToken;
+      //console.log("authHeader:", authHeader);
+      const headers = new HttpHeaders({ 'Authorization': authHeader });
+      return this.http.get<any>(url, { headers })
+    })).subscribe({
+      next: response => {
+        console.log("rr");
+        console.log(response);
+        this.logString += "hash_innreach_locations_on_publishing: " + response.hash_innreach_locations_on_publishing + "\n";
+        this.customerParamHashLocations = response.hash_innreach_locations_on_publishing;
+        console.log(this.customerParamHashLocations);
+        this.loadLocationCodes();
+       }, error: error => {
+        console.log("er");
+        console.log(error);
+        this.logString += "Response: " + JSON.stringify(error.error) + "\n";
+        this.alert.error(`Operation failed. Cause: ${error.message}`)
+      }
+    });
+  }
+
   loadLocationCodes() {
+
     this.restService.call('/conf/libraries').subscribe(result => {
       //console.log(result);
       if (!result.library) {
@@ -44,6 +68,7 @@ export class MainComponent implements OnInit {
       }
       result.library.forEach((elementLib, index) => {
         var libCode = elementLib.code;
+        var libName = elementLib.name;
         this.restService.call('/conf/libraries/' + libCode + '/locations').subscribe(result => {
           //console.log(result);
           if (result.location) {
@@ -51,19 +76,21 @@ export class MainComponent implements OnInit {
             result.location.forEach((elementHol, index) => {
               var locCode = elementHol.code; var holname = elementHol.name;
               //console.log(libCode +" > " + holCode);
-              if (locCode.length > 5) {
-                this.logString += "Warning: location code longer than 5 characters: " + locCode + " in library: " + libCode + "\n";
-              } else if (this.allLocationCodes.includes(locCode)) {
-                this.logString += "Warning: Duplicate location code: " + locCode + ". Skipping the one in library: " + libCode + "\n";
+              if (this.customerParamHashLocations) {
+                this.locationsJsonArr.push({ "locationKey": libCode+"."+locCode, "description": libName+" - "+holname });
               } else {
-                this.allLocationCodes.push(locCode);
-                this.locationsJsonArr.push({ "locationKey": locCode, "description": holname });
+                if (locCode.length > 5) {
+                  this.logString += "Warning: location code longer than 5 characters: " + locCode + " in library: " + libCode + "\n";
+                } else if (this.allLocationCodes.includes(locCode)) {
+                  this.logString += "Warning: Duplicate location code: " + locCode + ". Skipping the one in library: " + libCode + "\n";
+                } else {
+                  this.allLocationCodes.push(locCode);
+                  this.locationsJsonArr.push({ "locationKey": locCode, "description": holname });
+                }
               }
-
             });
           }
-        }
-        );
+        });
       });
     });
   }
@@ -86,25 +113,22 @@ export class MainComponent implements OnInit {
 
       this.allowRun = !this.allowRun;
 
-    }
-    );
+    });
   }
-
 
   callInnreach(e) {
     console.log(e)
     this.isLoading = true;
-    this.logString += "Unique location codes: " + this.allLocationCodes + "\n";
-
-    let locationsJson = { "locationList": this.locationsJsonArr };
+    //this.logString += "Unique location codes: " + this.allLocationCodes + "\n";
+    let locationsJson = this.locationsJsonArr;
     // tests: 
-    // let locationsJson={"locationList":[{"locationKey":"amlc1", "description":"Alma North Branch"},{"locationKey":"amlc2", "description":"Alma South Branch"}]}
-    // let locationsJson={"locationList":[{"locationKey":"amlc11","description":"Music Theses Suppressed"}]};
+    // let locationsJson=[{"locationKey":"amlc1", "description":"Alma North Branch"},{"locationKey":"amlc2", "description":"Alma South Branch"}]
+
     forkJoin({ initData: this.eventsService.getInitData(), authToken: this.eventsService.getAuthToken() }).pipe(concatMap((data) => {
-      let url = data.initData.urls['alma'] + "/view/innreachCloudApp";
+      let url = data.initData.urls['alma'] + "view/innreachCloudApp";
       console.log("getInitData (to get Alma's URL): ", url);
       this.logString += "User: " + data.initData.user.primaryId + "\n";
-      this.logString += "Fetched token from Alma\nCalling https://rssandbox-api.iii.com/innreach/v2/contribution/locations ...\n";
+      this.logString += "Fetched token from Alma\nCalling https://innreach-url/innreach/v2/contribution/locations ...\n";
       this.logString += "Body:\n" + JSON.stringify(locationsJson) + "\n";
       let authHeader = "Bearer " + data.authToken;
       console.log("authHeader:", authHeader);
@@ -126,4 +150,12 @@ export class MainComponent implements OnInit {
       }
     });
   }
+
+
+
+
+
+
+
+
 }
