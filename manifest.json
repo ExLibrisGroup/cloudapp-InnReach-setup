@@ -1,5 +1,5 @@
 {
-   "id": "exlibrisgroup/inn-reach-locations-setup",
+   "id": "ExLibrisGroup/cloudapp-InnReach-setup",
    "title": "InnReach Locations Setup",
    "subtitle": "Automatically get the info from Alma and update InnReach using an API call",
    "author": "Ori Miller",
