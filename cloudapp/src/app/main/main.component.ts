@@ -145,7 +145,7 @@ export class MainComponent implements OnInit {
         console.log("er");
         console.log(error);
         this.logString += "Response: " + JSON.stringify(error.error) + "\n";
-        this.alert.error(`Operation failed cause to ${error.message}`)
+        this.alert.success("Done");
         this.isLoading = false;
       }
     });
