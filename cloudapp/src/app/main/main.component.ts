@@ -76,7 +76,7 @@ export class MainComponent implements OnInit {
             result.location.forEach((elementHol, index) => {
               var locCode = elementHol.code; var holname = elementHol.name;
               //console.log(libCode +" > " + holCode);
-              if (this.customerParamHashLocations) {
+              if (this.customerParamHashLocations == "true") {
                 this.locationsJsonArr.push({ "locationKey": libCode+"."+locCode, "description": libName+" - "+holname });
               } else {
                 if (locCode.length > 5) {
